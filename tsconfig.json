@@ -7,7 +7,7 @@
       "es6",
       "DOM"
     ],
-    "target": "ES6",
+    "target": "ESNext",
     "declaration": false,
     "noEmitOnError": true,
     "noImplicitAny": true,

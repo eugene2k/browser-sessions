@@ -13,7 +13,7 @@ build: prepare
 	web-ext $(WEXT_FLAGS) $(WEXT_BUILD_FLAGS) build
 
 run: prepare
-	web-ext $(WEXT_FLAGS) run --devtools
+	web-ext $(WEXT_FLAGS) run --devtools -p ~/.mozilla/firefox/nayl7iyx.default-release/
 
 prepare: $(JS_FILES)
 	cp -r res/* $(OUTDIR)

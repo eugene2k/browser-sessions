@@ -11,24 +11,17 @@
       "background_script.js"
     ]
   },
-  "browser_action": {
-    "default_icon": {
-      "64": "icons/icon.png"
-    },
-    "default_popup": "browserAction/index.html",
-    "default_title": "browser-sessions"
+  "chrome_settings_overrides": {
+    "homepage": "homePage/index.html"
   },
-  "page_action": {
-    "default_icon": {
-      "64": "icons/icon.png"
-    },
-    "default_popup": "pageAction/index.html",
-    "default_title": "browser-sessions"
+  "chrome_url_overrides": {
+    "newtab": "homePage/index.html"
   },
   "options_ui": {
     "page": "options/index.html"
   },
   "permissions": [
-    "tabs"
+    "tabs",
+    "topSites"
   ]
 }
