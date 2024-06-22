@@ -1,27 +1,37 @@
 {
   "manifest_version": 2,
-  "name": "browser-sessions",
-  "description": "Browser Sessions Manager",
-  "version": "0.0.1",
+  "name": "Tabs store",
+  "description": "Tabs store",
+  "version": "0.0.17",
   "icons": {
-    "64": "icons/icon.png"
+    "32": "icons/icon.svg",
+    "48": "icons/icon.svg",
+    "64": "icons/icon.svg"
   },
   "background": {
     "scripts": [
       "background_script.js"
     ]
   },
-  "chrome_settings_overrides": {
-    "homepage": "homePage/index.html"
-  },
-  "chrome_url_overrides": {
-    "newtab": "homePage/index.html"
+  "sidebar_action": {
+    "default_title": "Stored Tabs",
+    "default_panel": "sidebar/sidebar.html",
+    "default_icon": "icons/icon.svg",
+    "open_at_install": true
   },
   "options_ui": {
     "page": "options/index.html"
   },
   "permissions": [
+    "alarms",
     "tabs",
-    "topSites"
-  ]
+    "sessions",
+    "storage",
+    "bookmarks"
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{e796cf79-057f-4d74-b03f-03344f8c837d}"
+    }
+  }
 }

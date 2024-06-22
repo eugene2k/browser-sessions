@@ -1,4 +1,7 @@
+pkg
 build
 node_modules
+test_profile
+web-ext-artifacts
 package.json
 package-lock.json

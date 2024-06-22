@@ -1,0 +1,125 @@
+[hidden] {
+  display: none !important;
+}
+
+[selected] {
+  background-color: lightblue !important;
+}
+
+ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+div#folderChooser {
+  display: flex;
+  flex-direction: column;
+  background-color: gainsboro;
+}
+
+div#setFolder {
+  align-self: flex-end;
+  padding: 2pt 5pt;
+  margin: 2pt 5pt;
+  background-color: cornflowerblue;
+  color: white;
+  border-radius: 2pt;
+}
+
+div#folderChooser ul#childrenList {
+  background-color: gainsboro;
+}
+
+div#folderChooser ul#childrenList li {
+  display: flex;
+  justify-content: space-between;
+}
+
+div#folderChooser ul li {
+  padding: 2pt 5px;
+  background-color: white;
+  margin-bottom: 1px;
+}
+
+div#folderChooser ul#parentsList {
+  background-color: white;
+}
+
+div#folderChooser ul#parentsList li {
+  background-color: steelblue;
+  color: white;
+  font-weight: bold;
+}
+
+div.enterBtn {
+  width: 11pt;
+  height: 9pt;
+  background-image: url('../icons/enter.svg');
+  background-size: 11pt;
+  background-repeat: no-repeat;
+  display: inline-block;
+  cursor: pointer;
+}
+
+div#headerbar {
+  display: flex;
+  padding: 2pt;
+  font-size: larger;
+  background-color: gainsboro;
+  justify-content: space-between;
+}
+
+div#folderChooserBtn {
+  display: inline-block;
+  cursor: pointer;
+  border-radius: 5pt;
+  height: 18pt;
+  padding: 2pt;
+}
+
+div#folderChooserBtn:hover {
+  background-color: white;
+}
+
+div#toolbar div {
+  cursor: pointer;
+  display: inline-block;
+  background-size: 11pt;
+  width: 18pt;
+  height: 18pt;
+  background-repeat: no-repeat;
+  background-position: center;
+  border-radius: 5pt;
+}
+
+div#storeCurrent {
+  background-image: url('../icons/saveone.svg');
+}
+
+div#storeDiscarded {
+  background-image: url('../icons/saveall.svg');
+}
+
+div#toolbar div:hover {
+  background-color: snow;
+}
+
+ul#store li {
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 5pt;
+  text-overflow: ellipsis;
+}
+
+
+ul#store li img {
+  margin-right: 5pt;
+  vertical-align: baseline;
+}
+
+ul#store li:hover {
+  text-decoration: underline;
+  cursor: pointer;
+  background-color: beige;
+}

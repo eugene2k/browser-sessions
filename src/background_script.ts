@@ -3,25 +3,32 @@ declare global {
     const browser: Browser;
 }
 
-// maintain a global HashMap<WindowId, HashMap<TabId, TabData>> where TabData = (PageTitle, PageURL)
-
-// browser.windows.onCreated.addListener(window => {
-//     // Add the window to a global list of currently open windows
-// })
-
-browser.windows.onRemoved.addListener(window => {
-    // If this window had no tabs except those that contain the launcher, then remove it from the sessions list
+browser.sessions.onChanged.addListener(async () => {
+    let recentlyClosed = await browser.sessions.getRecentlyClosed({ maxResults: 1 })
+    let session = recentlyClosed[0]
+    if (session.window != undefined) {
+        let tabs = session.window.tabs
+        if (tabs != undefined && tabs.length > 1) {
+            let storage = await browser.storage.local.get("folderId")
+            let folderId = assert(storage.folderId)
+            for (let i = 0; i < tabs.length; i++) {
+                let tab = tabs[i]
+                if (tab.url?.startsWith("http")) {
+                    browser.bookmarks.create({ url: tab.url, title: tab.title, parentId: folderId, index: 0 })
+                }
+            }
+        }
+    }
 })
 
-browser.tabs.onCreated.addListener(tab => {
-    // If the opener tab id is not null and current window is not in sessions list add the window to the list along with the current tab
-    // elsewise open the launcher page.
+
+browser.runtime.onInstalled.addListener(async (details) => {
+    let store = await browser.storage.local.get("folderId")
+    if (!store.folderId)
+        await browser.storage.local.set({ "folderId": "unfiled_____" })
 })
 
-browser.tabs.onUpdated.addListener(tab => {
-    // If current tab id is not in HashMap<TabId, TabData> of current window, then insert it into the hashmap, otherwise just update the TabData
-})
-
-browser.tabs.onRemoved.addListener(tab => {
-    // Remove current tab from HashMap<TabId. TabData>
-})
+function assert<T>(expr: T | null | undefined): T {
+    if (expr === null || expr === undefined) throw "expr is null"
+    return expr
+}

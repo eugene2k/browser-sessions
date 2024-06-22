@@ -1,11 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <link href="style.css" rel="stylesheet" />
-  </head>
-  <body>
-    <h1 id="myHeading">My content</h1>
-    <script src="script.js"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8">
+  <link href="style.css" rel="stylesheet" />
+</head>
+
+<body>
+  <script src="script.js"></script>
+  <div id="options">
+    <ul>
+      <li>Bookmark folder to store tabs in: <select id="folder_list"></select></li>
+    </ul>
+
+    <div id="theme">
+      <ul>
+        <li>Sidebar background color: <input type="color" id="sidebar_bg_color"></li>
+        <li>Toolbar background color: <input type="color" id="toolbar_bg_color"></li>
+        <li>Toolbar button default color: <input type="color" id="toolbar_btn_color"></li>
+        <li>Toolbar button hover color: <input type="color" id="toolbar_btn_hover_color"></li>
+        <li>List item default color: <input type="color" id="toolbar_item_color"></li>
+        <li>List item hover color: <input type="color" id="toolbar_item_hover_color"></li>
+      </ul>
+    </div>
+  </div>
+</body>
+
 </html>
