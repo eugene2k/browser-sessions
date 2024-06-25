@@ -6,8 +6,7 @@ document.addEventListener("DOMContentLoaded", async ev => {
     populateListWithBookmarksFromFolder(bookmarksList, folderId)
     let currentFolder = await getBookmark(folderId)
     let folderChooserBtn = assert(document.getElementById("folderChooserBtn"))
-    folderChooserBtn.append(currentFolder.title)
-    folderChooserBtn.setAttribute("folderId", folderId)
+    setElementTextAndAttribute(folderChooserBtn, currentFolder.title, "folderId", folderId)
     folderChooserBtn.onclick = async (ev) => {
         let self = ev.target as HTMLDivElement
         let childrenList = assert(document.getElementById("childrenList"))
@@ -34,10 +33,8 @@ document.addEventListener("DOMContentLoaded", async ev => {
                 let newFolderId = assert(item.getAttribute("folderId"))
                 if (newFolderId != oldFolderId) {
                     browser.storage.local.set({ "folderId": item.getAttribute("folderId") })
-                    folderChooserBtn.setAttribute("folderId", newFolderId)
-                    folderChooserBtn.replaceChildren()
                     let folder = await getBookmark(newFolderId)
-                    folderChooserBtn.append(folder.title)
+                    setElementTextAndAttribute(folderChooserBtn, folder.title, "folderId", newFolderId)
                     store.replaceChildren()
                     populateListWithBookmarksFromFolder(store, newFolderId)
                 }
@@ -57,7 +54,6 @@ document.addEventListener("DOMContentLoaded", async ev => {
         let currentTab = currentWin.tabs?.find((tab) => tab.active)
         if (currentTab && currentTab.url && currentTab.url.startsWith("http")) {
             let bookmark = await browser.bookmarks.create({ url: currentTab.url, title: currentTab.title, parentId: folderId, index: 0 })
-            bookmarksList?.append(createStoreListItem(bookmark))
             if (currentTab.id)
                 browser.tabs.remove(currentTab.id)
         }
@@ -70,7 +66,6 @@ document.addEventListener("DOMContentLoaded", async ev => {
             for (let tab of currentWin.tabs) {
                 if (tab.url && tab.url.startsWith("http") && tab.discarded) {
                     let bookmark = await browser.bookmarks.create({ url: tab.url, title: tab.title, parentId: folderId, index: 0 })
-                    bookmarksList?.append(createStoreListItem(bookmark))
                     if (tab.id)
                         browser.tabs.remove(tab.id)
                 }
@@ -90,8 +85,7 @@ document.addEventListener("DOMContentLoaded", async ev => {
 
 async function createParentsListItem(bookmark: Bookmarks.BookmarkTreeNode): Promise<HTMLLIElement> {
     let li = document.createElement("li")
-    li.append(bookmark.title)
-    li.setAttribute("parentId", bookmark.parentId!)
+    setElementTextAndAttribute(li, bookmark.title, "parentId", bookmark.parentId!)
     li.onclick = async () => {
         let childrenList = assert(document.getElementById("childrenList")) as HTMLUListElement
         let parentId = assert(li.getAttribute("parentId"))
@@ -136,8 +130,7 @@ async function populateListWithBookmarksFromFolder(list: HTMLUListElement, folde
 
 async function createFolderListItem(bookmark: Bookmarks.BookmarkTreeNode): Promise<HTMLLIElement> {
     let li = document.createElement("li") as HTMLLIElement
-    li.append(bookmark.title)
-    li.setAttribute("folderId", bookmark.id)
+    setElementTextAndAttribute(li, bookmark.title, "folderId", bookmark.id)
     li.onclick = async (ev) => {
         // check if this function should trigger or if the event is meant for a child element
         if (ev.target != ev.currentTarget) return
@@ -173,7 +166,8 @@ async function createFolderListItem(bookmark: Bookmarks.BookmarkTreeNode): Promi
 
 function createStoreListItem(bookmark: Bookmarks.BookmarkTreeNode): HTMLLIElement {
     let li = document.createElement("li")
-    li.setAttribute("bookmarkId", bookmark.id)
+    let title = bookmark.title ? bookmark.title : bookmark.url!
+    setElementTextAndAttribute(li, title, "bookmarkId", bookmark.id)
     // if (faviconUrl) {
     //     let favicon = document.createElement("img")
     //     favicon.src = faviconUrl
@@ -181,8 +175,6 @@ function createStoreListItem(bookmark: Bookmarks.BookmarkTreeNode): HTMLLIElemen
     //     favicon.height = 16
     //     li.append(favicon)
     // }
-    let title = bookmark.title ? bookmark.title : bookmark.url!
-    li.append(title)
     li.title = title
     li.onclick = async () => {
         let bookmarkId = li.getAttribute("bookmarkId");
@@ -191,7 +183,6 @@ function createStoreListItem(bookmark: Bookmarks.BookmarkTreeNode): HTMLLIElemen
             browser.tabs.create({ url: bookmark.url })
             browser.bookmarks.remove(bookmarkId)
         }
-        li.remove()
     }
     return li
 }
@@ -207,15 +198,70 @@ function assert<T>(expr: T | null | undefined): T {
     if (expr === null || expr === undefined) throw "Assert failed: null or undefined value!"
     return expr
 }
+function setElementTextAndAttribute(element: HTMLElement, text: string, attr: string, val: string) {
+    element.setAttribute(attr, val)
+    element.textContent = text
+}
 
 browser.bookmarks.onRemoved.addListener(async (id, removeInfo) => {
-    if (await getFolderId() == id) {
-        browser.storage.local.set({ "folderId": "unfiled_____" })
+    let folderId = await getFolderId()
+    let storeElement = document.getElementById("store") as HTMLUListElement
+    if (folderId == id) {
+        browser.storage.local.set({ "folderId": removeInfo.parentId })
+        let folderChooserBtn = assert(document.getElementById("folderChooserBtn"))
+        let folder = await getBookmark(removeInfo.parentId)
+        setElementTextAndAttribute(folderChooserBtn, folder.title, "folderId", removeInfo.parentId)
+        storeElement.replaceChildren()
+        populateListWithBookmarksFromFolder(storeElement, removeInfo.parentId)
+    } else if (folderId == removeInfo.parentId) {
+        let child = storeElement?.firstChild as HTMLLIElement
+        while (child) {
+            if (child.getAttribute("bookmarkId") == id) {
+                child.remove()
+                break
+            }
+            child = child.nextSibling as HTMLLIElement
+        }
+    } else {
+        let parentsList = document.getElementById("parentsList")
+        let lastParent = parentsList?.lastChild as HTMLLIElement
+        let childrenList = document.getElementById("childrenList") as HTMLUListElement
+        // if the bookmark is a sibling find it in the childrenList and remove it
+        if (lastParent.getAttribute("parentId") == removeInfo.parentId) {
+            let child = childrenList?.firstChild as HTMLLIElement
+            while (child) {
+                if (child.getAttribute("folderId") == id) {
+                    child.remove()
+                    break
+                }
+            }
+        } else {
+            // check if the bookmark is a grandparent
+            let parent = parentsList?.firstChild as HTMLLIElement
+            let removeFlag = false
+            while (parent) {
+                if (parent.getAttribute("parentId") == id || removeFlag) {
+                    let parentId = parent.previousElementSibling?.getAttribute("parentId")
+                    childrenList.replaceChildren()
+                    populateListWithFoldersFromFolder(childrenList, parentId!)
+                    parent.remove()
+                }
+                parent = parent.nextSibling as HTMLLIElement
+            }
+        }
     }
+
     // TODO: if the sidebar has defaultView currently, then 
     // 1. check if id is any of the bookmarks in the #store and delete the appropriate list element if so
     // 2. check if id matches current folderId and update the local storage as well as the folderChooserBtn and subsequently the list of bookmarks if so
     // otherwise check if id is any of matches any folderId attributes in parentsList and delete the appropriate list elements if so
 })
-
+browser.bookmarks.onCreated.addListener(async (id, bookmark) => {
+    let currentFolderId = await getFolderId()
+    if (bookmark.parentId == currentFolderId) {
+        let storeElement = document.getElementById("store") as HTMLUListElement
+        let li = createStoreListItem(bookmark)
+        storeElement.firstChild?.before(li)
+    }
+})
 //TODO: add a listener for onChanged to update the list of parents if any of the parent folders have changed parents or their names and to update the list of bookmarks if a bookmark has changed parents or a url/title

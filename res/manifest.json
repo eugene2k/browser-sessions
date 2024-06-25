@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Tabs store",
   "description": "Tabs store",
-  "version": "0.0.17",
+  "version": "0.0.19",
   "icons": {
     "32": "icons/icon.svg",
     "48": "icons/icon.svg",
