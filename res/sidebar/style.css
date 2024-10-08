@@ -68,6 +68,7 @@ div#headerbar {
   font-size: larger;
   background-color: gainsboro;
   justify-content: space-between;
+  overflow: scroll;
 }
 
 div#folderChooserBtn {

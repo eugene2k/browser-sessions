@@ -250,11 +250,6 @@ browser.bookmarks.onRemoved.addListener(async (id, removeInfo) => {
             }
         }
     }
-
-    // TODO: if the sidebar has defaultView currently, then 
-    // 1. check if id is any of the bookmarks in the #store and delete the appropriate list element if so
-    // 2. check if id matches current folderId and update the local storage as well as the folderChooserBtn and subsequently the list of bookmarks if so
-    // otherwise check if id is any of matches any folderId attributes in parentsList and delete the appropriate list elements if so
 })
 browser.bookmarks.onCreated.addListener(async (id, bookmark) => {
     let currentFolderId = await getFolderId()
@@ -264,4 +259,47 @@ browser.bookmarks.onCreated.addListener(async (id, bookmark) => {
         storeElement.firstChild?.before(li)
     }
 })
-//TODO: add a listener for onChanged to update the list of parents if any of the parent folders have changed parents or their names and to update the list of bookmarks if a bookmark has changed parents or a url/title
+
+//FIXME: update folder view if a folder title is changed
+browser.bookmarks.onChanged.addListener(async (id, changeInfo) => {
+    let currentFolderId = await getFolderId()
+    if (currentFolderId == id) {
+        let folderChooserBtn = assert(document.getElementById("folderChooserBtn"))
+        folderChooserBtn.textContent = changeInfo.title
+    } else {
+        let changedBookmark = await getBookmark(id)
+        if (changedBookmark.parentId == currentFolderId) {
+            let storeElement = document.getElementById("store") as HTMLUListElement
+            let child = storeElement?.firstChild as HTMLLIElement
+            while (child) {
+                if (child.getAttribute("bookmarkId") == id) {
+                    child.textContent = changeInfo.title
+                    break
+                }
+                child = child.nextSibling as HTMLLIElement
+            }
+        }
+    }
+})
+
+//FIXME: update folder view if a folder is moved into or out of the currently viewed folder
+browser.bookmarks.onMoved.addListener(async (id, moveInfo) => {
+    if (moveInfo.oldParentId != moveInfo.parentId) {
+        let currentFolderId = await getFolderId()
+        let storeElement = document.getElementById("store") as HTMLUListElement
+        if (moveInfo.oldParentId == currentFolderId) {
+            let child = storeElement?.firstChild as HTMLLIElement
+            while (child) {
+                if (child.getAttribute("bookmarkId") == id) {
+                    child.remove()
+                    break
+                }
+                child = child.nextSibling as HTMLLIElement
+            }
+        } else if (moveInfo.parentId == currentFolderId) {
+            let bookmark = await getBookmark(id)
+            let li = createStoreListItem(bookmark)
+            storeElement.firstChild?.before(li) //FIXME: add the moved bookmark according to its index
+        }
+    }
+})
